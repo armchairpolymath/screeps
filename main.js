@@ -3,7 +3,7 @@ require('prototype.creep');
 require('prototype.tower');
 require('prototype.spawn');
 
- Game.spawns.Spawn1.memory.minCreeps={'harvester':1,'builder':2,'repairer':1,'wallRepairer':1,'upgrader':10,'lorry':2};
+ Game.spawns.Spawn1.memory.minCreeps={'harvester':3,'builder':2,'repairer':0,'wallRepairer':0,'upgrader':5,'lorry':0, 'marine':0, 'medic':0, 'archer':0};
  // Game.spawns.Spawn1.memory.minLongDistanceHarvesters={'E4S15':1};
  // Game.spawns.Spawn1.memory.claimRoom={target: 'E4S15'};
  // Game.spawns.Spawn2.memory.minCreeps={'harvester':2,'builder':2,'repairer':2,'wallRepairer':1,'upgrader':2,'lorry':0};

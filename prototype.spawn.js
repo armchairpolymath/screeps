@@ -1,4 +1,4 @@
-var listOfRoles = ['harvester', 'lorry', 'claimer', 'upgrader', 'repairer', 'builder', 'wallRepairer', 'signer', 'defender'];
+var listOfRoles = ['harvester', 'lorry', 'claimer', 'upgrader', 'repairer', 'builder', 'wallRepairer', 'signer', 'marine', 'medic', 'archer'];
 
 // create a new function for StructureSpawn
 StructureSpawn.prototype.spawnCreepsIfNecessary =
@@ -33,7 +33,7 @@ StructureSpawn.prototype.spawnCreepsIfNecessary =
             // if there is no miner and not enough energy in Storage left
             else {
                 // create a harvester because it can work on its own
-                console.log('emergency harvester');
+                
                 name = this.createCustomCreep(room.energyAvailable, 'harvester');
             }
         }
@@ -82,18 +82,20 @@ StructureSpawn.prototype.spawnCreepsIfNecessary =
                         
                     }
                 }
-                // let's try to builder a defender.
-                if (role == 'defender' && (false)) {
-                    name = this.createCustomCreep(maxEnergy, role);
-                }
-
-
-
-
+                
                 // if no claim order was found, check other roles
                 else if (numberOfCreeps[role] < this.memory.minCreeps[role]) {
                     if (role == 'lorry') {
                         name = this.createLorry(150);
+                    }
+                    else if (role == 'medic'){
+                        name = this.createMedic(maxEnergy);
+                    }
+                    else if (role == 'archer'){
+                        name = this.createArcher(maxEnergy);
+                    }
+                    else if (role == 'marine'){
+                        name = this.createMarine(maxEnergy);
                     }
                     else {
                         name = this.createCustomCreep(maxEnergy, role);
@@ -185,6 +187,75 @@ StructureSpawn.prototype.createLongDistanceHarvester =
             working: false
         });
     };
+    StructureSpawn.prototype.createMarine =
+    function (energy) {
+    // create a balanced body as big as possible with the given energy
+    var numberOfParts = Math.floor(energy / 190);
+    // make sure the creep is not too big (more than 50 parts)
+    numberOfParts = Math.min(numberOfParts, Math.floor(50 / 4));
+    var body = [];
+    for (let i = 0; i < numberOfParts; i++) {
+        body.push(ATTACK);
+    }
+    for (let i = 0; i < numberOfParts; i++) {
+        body.push(TOUGH);
+    }
+    for (let i = 0; i < numberOfParts; i++) {
+        body.push(MOVE);
+    }
+    for (let i = 0; i < numberOfParts; i++) {
+        body.push(MOVE);
+    }
+
+    // create creep with the created body and the given role
+    return this.createCreep(body, undefined, { role: 'marine', working: false, roleChange: false });
+};
+
+    // create a new function for StructureSpawn
+StructureSpawn.prototype.createArcher =
+    function (energy) {
+    // create a balanced body as big as possible with the given energy
+    var numberOfParts = Math.floor(energy / 210);
+    // make sure the creep is not too big (more than 50 parts)
+    numberOfParts = Math.min(numberOfParts, Math.floor(50 / 3));
+    var body = [];
+    for (let i = 0; i < numberOfParts; i++) {
+        body.push(TOUGH);
+    }
+    for (let i = 0; i < numberOfParts; i++) {
+        body.push(RANGED_ATTACK);
+    }
+    for (let i = 0; i < numberOfParts; i++) {
+        body.push(MOVE);
+    }
+
+    // create creep with the created body and the given role
+    return this.createCreep(body, undefined, { role: 'archer', working: false, roleChange: false });
+};
+
+StructureSpawn.prototype.createMedic =
+    function (energy) {
+    // create a balanced body as big as possible with the given energy
+    var numberOfParts = Math.floor(energy / 350);
+    // make sure the creep is not too big (more than 50 parts)
+    numberOfParts = Math.min(numberOfParts, Math.floor(50 / 3));
+    var body = [];
+    for (let i = 0; i < numberOfParts; i++) {
+        body.push(HEAL);
+    }
+    for (let i = 0; i < numberOfParts; i++) {
+        body.push(MOVE);
+    }
+    for (let i = 0; i < numberOfParts; i++) {
+        body.push(MOVE);
+    }
+
+    // create creep with the created body and the given role
+    return this.createCreep(body, undefined, { role: 'medic', working: false, roleChange: false });
+};
+
+
+    
 // create a new function for StructureSpawn
 StructureSpawn.prototype.createSigner  =
     function (signContent) {

@@ -48,7 +48,7 @@ module.exports = {
                 // try to repair it, if not in range
                 if (creep.repair(target) == ERR_NOT_IN_RANGE) {
                     // move towards it
-                    creep.pos.createConstructionSite(STRUCTURE_ROAD);
+                    // creep.pos.createConstructionSite(STRUCTURE_ROAD);
                     creep.moveTo(target);
                     
                 }
