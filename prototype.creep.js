@@ -10,6 +10,11 @@ var roles = {
 	lorry: require("role.lorry"),
 	signer: require("role.signer"),
 	marine: require("role.marine"),
+	medic: require("role.medic"),
+	grunt: require("role.grunt"),
+	airborne: require("role.airborne"),
+	longDistanceBuilder: require("role.longDistanceBuilder"),
+	truck: require("role.truck")	
 };
 
 Creep.prototype.runRole = function () {
@@ -22,10 +27,8 @@ Creep.prototype.runRole = function () {
 Creep.prototype.getEnergy = function (useContainer, useSource, useDropped) {
 	/** @type {StructureContainer} */
 	let container;
-	// first lets get energy from tombstones
-	container = this.pos.findClosestByPath(FIND_TOMBSTONES, {
-		filter: (s) => s.store[RESOURCE_ENERGY] > 20,
-	});
+	
+	
 	if (useDropped) {
 		// try the ground, because decay
 		target = this.pos.findClosestByRange(FIND_DROPPED_RESOURCES, {

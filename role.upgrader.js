@@ -21,7 +21,7 @@ module.exports = {
 			// try to upgrade the controller
 			if (creep.upgradeController(creep.room.controller) == ERR_NOT_IN_RANGE) {
 				// if not in range, move towards the controller
-				creep.pos.createConstructionSite(STRUCTURE_ROAD);
+				// creep.pos.createConstructionSite(STRUCTURE_ROAD);
 				creep.moveTo(creep.room.controller, {
 					visualizePathStyle: {
 						fill: "transparent",
@@ -36,8 +36,8 @@ module.exports = {
 		// if creep is supposed to get energy
 		else {
 			// container, source, dropped
-			creep.pos.createConstructionSite(STRUCTURE_ROAD);
-			creep.getEnergy(true, false, true); //container, source, dropped
+			// creep.pos.createConstructionSite(STRUCTURE_ROAD);
+			creep.getEnergy(true, true, true); //container, source, dropped
 		}
 	},
 };

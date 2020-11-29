@@ -24,9 +24,8 @@ module.exports = {
 					// we use the arrow operator to define it
 					filter: (s) =>
 						(s.structureType == STRUCTURE_SPAWN ||
-							s.structureType == STRUCTURE_EXTENSION ||
 							s.structureType == STRUCTURE_TOWER ||
-							s.structureType == STRUCTURE_CONTAINER) &&
+							s.structureType == STRUCTURE_EXTENSION) &&
 						s.energy < s.energyCapacity,
 				});
 
@@ -49,6 +48,12 @@ module.exports = {
 							},
 						});
 					}
+					var currentFillCount;
+					var newFillCount;
+					currentFillCount = creep.memory.fillCount;
+					newFillCount = currentFillCount + 1;
+					creep.memory.fillCount = newFillCount;
+
 				}
 			}
 			// if not in home room...

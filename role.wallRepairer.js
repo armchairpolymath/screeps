@@ -52,9 +52,9 @@ module.exports = {
 						visualizePathStyle: {
 							fill: "transparent",
 							stroke: "#FF0000", // Red for repairer
-							lineStyle: "dashed",
+							lineStyle: "solid",
 							strokeWidth: 0.08,
-							opacity: 1,
+							opacity: 0.7
 						},
 					});
 				}

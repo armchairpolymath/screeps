@@ -2,13 +2,18 @@ module.exports = {
 	// a function to run the logic for this role
 	/** @param {Creep} creep */
 	run: function (creep) {
+
+
+
+
+        
 		// if creep is bringing energy to a structure but has no energy left
-		if (creep.memory.working == true && creep.carry.energy == 0) {
+		if (creep.memory.working == true && creep.store[RESOURCE_MINERAL] == 0) {
 			// switch state
 			creep.memory.working = false;
 		}
 		// if creep is harvesting energy but is full
-		else if (creep.memory.working == false && creep.carry.energy == creep.carryCapacity) {
+		else if (creep.memory.working == false && creep.store[RESOURCE_MINERAL] == creep.store.getCapacity()) {
 			// switch state
 			creep.memory.working = true;
 		}
@@ -24,7 +29,7 @@ module.exports = {
 					(s.structureType == STRUCTURE_SPAWN ||
 						s.structureType == STRUCTURE_EXTENSION ||
 						s.structureType == STRUCTURE_TOWER) &&
-					s.energy < s.energyCapacity,
+					s.store < s.store.getCapacity(),
 			});
 
 			if (structure == undefined) {
@@ -34,7 +39,7 @@ module.exports = {
 			// if we found one
 			if (structure != undefined) {
 				// try to transfer energy, if it is not in range
-				if (creep.transfer(structure, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+				if (creep.transfer(structure, RESOURCE_MINERAL) == ERR_NOT_IN_RANGE) {
 					// move towards it
 					creep.moveTo(structure, {
                         visualizePathStyle: {
@@ -52,39 +57,13 @@ module.exports = {
 		else {
 			//pickup engergy from the ground is more important because it decays
 			target = creep.pos.findClosestByRange(FIND_DROPPED_RESOURCES, {
-				filter: (s) => s.resourceType == RESOURCE_ENERGY,
+				filter: (s) => s.resourceType == RESOURCE_MINERAL,
 			});
 			if (target) {
 				if (creep.pickup(target) == ERR_NOT_IN_RANGE) {
 					creep.moveTo(target);
 				}
-			} else {
-				// find closest container
-				let container = creep.pos.findClosestByPath(FIND_STRUCTURES, {
-					filter: (s) => s.structureType == STRUCTURE_CONTAINER && s.store[RESOURCE_ENERGY] > 200,
-				});
-
-				if (container == undefined) {
-					container = creep.room.storage;
-				}
-
-				// if one was found
-				if (container != undefined) {
-					// try to withdraw energy, if the container is not in range
-					if (creep.withdraw(container, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-						// move towards it
-						creep.moveTo(container, {
-							visualizePathStyle: {
-								fill: "transparent",
-								stroke: "#FFFFFF", //White for Lorry
-								lineStyle: "dashed",
-								strokeWidth: 0.08,
-								opacity: 1,
-							},
-						});
-					}
-				}
-			}
+			} 
 		}
 	},
 };
