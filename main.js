@@ -2,16 +2,17 @@
 require("prototype.creep");
 require("prototype.tower");
 require("prototype.spawn");
+require("prototype.link");
 
 
 
 Game.spawns.Spawn1.memory.minCreeps = {
 	harvester: 0,
-	builder: 1,
+	builder: 0,
 	repairer: 1,
-	wallRepairer: 1,
-	upgrader: 2,
-	lorry: 2,
+	wallRepairer: 0,
+	upgrader: 1,
+	lorry: 1,
 	marine: 0,
 	medic: 0,
 	archer: 0,
@@ -19,12 +20,12 @@ Game.spawns.Spawn1.memory.minCreeps = {
 };
 
 Game.spawns.Spawn2.memory.minCreeps = {
-	harvester: 1,
+	harvester: 0,
 	builder: 0,
-	repairer: 0,
+	repairer: 1,
 	wallRepairer: 0,
 	upgrader: 1,
-	lorry: 0,
+	lorry: 1,
 	marine: 0,
 	medic: 0,
 	archer: 0,
@@ -32,12 +33,12 @@ Game.spawns.Spawn2.memory.minCreeps = {
 };
 
 Game.spawns.Spawn3.memory.minCreeps = {
-	harvester: 1,
+	harvester: 0,
 	builder: 0,
-	repairer: 0,
-	wallRepairer: 0,
+	repairer: 1,
+	wallRepairer: 1,
 	upgrader: 1,
-	lorry: 0,
+	lorry: 1,
 	marine: 0,
 	medic: 0,
 	archer: 0,
@@ -45,12 +46,12 @@ Game.spawns.Spawn3.memory.minCreeps = {
 };
 
 Game.spawns.Spawn4.memory.minCreeps = {
-	harvester: 1,
+	harvester: 0,
 	builder: 0,
-	repairer: 0,
+	repairer: 1,
 	wallRepairer: 0,
 	upgrader: 1,
-	lorry: 0,
+	lorry: 1,
 	marine: 0,
 	medic: 0,
 	archer: 0,
@@ -68,9 +69,11 @@ Game.spawns.Spawn4.memory.minCreeps = {
 */
 //  Insert this line via command line: Game.spawns.Spawn1.memory.claimRoom = "E66S31";
 
-Game.spawns.Spawn1.memory.minLongDistanceHarvesters = { E67S32: 0, E66S33: 0, E66S31: 0 };
-Game.spawns.Spawn1.memory.minAirborne = { E67S32: 0, E66S33: 1 };
-Game.spawns.Spawn1.memory.minLongDistanceBuilders = { E67S32: 1, E66S33: 1, E66S31: 1 };
+Game.spawns.Spawn1.memory.minLongDistanceHarvesters 	= { E67S32: 0, E66S33: 0, E66S31: 0 };
+Game.spawns.Spawn1.memory.minAirborne 					= { E67S32: 0, E66S33: 0, E66S34: 0 };
+Game.spawns.Spawn1.memory.minSnipers 					= { E67S32: 0, E66S33: 0, E66S34: 0 };
+Game.spawns.Spawn1.memory.minLongDistanceBuilders 		= { E67S32: 0, E66S33: 0, E66S31: 0 };
+Game.spawns.Spawn2.memory.minLongDistanceHarvesters 	= { E68S32: 0, E66S33: 0, E66S31: 0 };
 
 module.exports.loop = function () {
 	// check for memory entries of died creeps by iterating over Memory.creeps

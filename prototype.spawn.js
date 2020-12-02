@@ -57,7 +57,7 @@ StructureSpawn.prototype.spawnCreepsIfNecessary = function () {
 		// if there is no miner and not enough energy in Storage left
 		else {
 			// create a harvester because it can work on its own
-			console.log("emergency harvester");
+			console.log(this.name + " emergency harvester");
 			name = this.createCustomCreep(room.energyAvailable, "harvester");
 		}
 	}
@@ -110,15 +110,17 @@ StructureSpawn.prototype.spawnCreepsIfNecessary = function () {
 			else if (numberOfCreeps[role] < this.memory.minCreeps[role]) {
 				if (role == "lorry") {
 					name = this.createLorry(150);
-				} else if (role == "medic") {
+				} 
+				else if (role == "medic") {
 					name = this.createMedic(maxEnergy);
-				} else if (role == "archer") {
+				} 
+				else if (role == "archer") {
 					name = this.createArcher(maxEnergy);
-				} else if (role == "marine") {
+				} 
+				else if (role == "marine") {
 					name = this.createMarine(maxEnergy);
-				} else if (role == 'airborne') {
-					name = this.createAirborne(maxEnergy);	
-				} else {
+				} 
+				else {
 					name = this.createCustomCreep(maxEnergy, role);
 				}
 				break;
@@ -198,7 +200,35 @@ StructureSpawn.prototype.spawnCreepsIfNecessary = function () {
 			console.log("LongDistanceBuilder_" + roomName + ": " + numberOfLongDistanceBuilders[roomName]);
 		}
 	}
+
+
+// if none of the above caused a spawn command check for Snipers
+	/** @type {Object.<string, number>} */
+	let numberOfSnipers = {};
+	if (name == undefined) {
+		// count the number of long distance buiders globally
+		for (let roomName in this.memory.minSnipers) {
+			numberOfSnipers[roomName] = _.sum(
+				Game.creeps,
+				(c) => c.memory.role == "sniper" && c.memory.target == roomName
+			);
+
+			if (numberOfSnipers[roomName] < this.memory.minSnipers[roomName]) {
+				console.log("bulid a sniper");
+				name = this.createSniper(maxEnergy, 2,room.name, roomName);
+			}
+		}
+	}
+
+	// print name to console if spawning was a success
+	if (name != undefined && _.isString(name)) {
+		console.log(this.name + " spawned new creep: " + name + " (" + Game.creeps[name].memory.role + ")");
+		for (let roomName in numberOfSniper) {
+			console.log("Sniper_" + roomName + ": " + numberOfSnipers[roomName]);
+		}
+	}
 };
+
 
 // create a new function for StructureSpawn
 StructureSpawn.prototype.createCustomCreep = function (energy, roleName) {
@@ -226,8 +256,7 @@ StructureSpawn.prototype.createCustomCreep = function (energy, roleName) {
 
 // create a new function for StructureSpawn
 StructureSpawn.prototype.createLongDistanceBuilder = function (energy, numberOfWorkParts, home, target) {
-	
-	
+		
 	var numberOfParts = Math.floor(energy / 200);
 	// make sure the creep is not too big (more than 50 parts)
 	numberOfParts = Math.min(numberOfParts, Math.floor(50 / 3));
@@ -344,6 +373,28 @@ StructureSpawn.prototype.createAirborne = function (energy, home, target) {
 	// create creep with the created body and the given role
 	return this.spawnCreep(body, "Airborne_" + Game.time, {
 		memory: { role: "airborne", target: target, home: home, working: false, roleChange: false },
+	});
+};
+
+StructureSpawn.prototype.createSniper = function (energy, home, target) {
+	// create a balanced body as big as possible with the given energy
+	var numberOfParts = Math.floor(energy / 210);
+	// make sure the creep is not too big (more than 50 parts)
+	numberOfParts = Math.min(numberOfParts, Math.floor(50 / 3));
+	var body = [];
+	for (let i = 0; i < numberOfParts; i++) {
+		body.push(TOUGH);
+	}
+	for (let i = 0; i < numberOfParts; i++) {
+		body.push(RANGED_ATTACK);
+	}
+	for (let i = 0; i < numberOfParts; i++) {
+		body.push(MOVE);
+	}
+
+	// create creep with the created body and the given role
+	return this.spawnCreep(body, "Sniper_" + Game.time, {
+		memory: { role: "sniper", target: target, home: home, working: false, roleChange: false },
 	});
 };
 

@@ -14,7 +14,8 @@ var roles = {
 	grunt: require("role.grunt"),
 	airborne: require("role.airborne"),
 	longDistanceBuilder: require("role.longDistanceBuilder"),
-	truck: require("role.truck")	
+	truck: require("role.truck"),
+	sniper: require("role.sniper")	
 };
 
 Creep.prototype.runRole = function () {
