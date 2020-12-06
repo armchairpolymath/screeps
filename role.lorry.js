@@ -21,7 +21,8 @@ module.exports = {
 				// a property called filter which can be a function
 				// we use the arrow operator to define it
 				filter: (s) =>
-					(s.structureType == STRUCTURE_SPAWN ||
+					(
+						s.structureType == STRUCTURE_SPAWN ||
 						s.structureType == STRUCTURE_EXTENSION ||
 						s.structureType == STRUCTURE_TOWER) &&
 					s.energy < s.energyCapacity,
@@ -63,10 +64,16 @@ module.exports = {
 				let container = creep.pos.findClosestByPath(FIND_STRUCTURES, {
 					filter: (s) => s.structureType == STRUCTURE_CONTAINER && s.store[RESOURCE_ENERGY] > 200,
 				});
+				
+				if (container == undefined) {
+				// find closest container
+				let container = creep.pos.findClosestByPath(FIND_STRUCTURES, {
+					filter: (s) => s.structureType == STRUCTURE_CONTAINER && s.store[RESOURCE_ENERGY] > 200,
+				});
 
 				if (container == undefined) {
 					container = creep.room.storage;
-				}
+				}}
 
 				// if one was found
 				if (container != undefined) {

@@ -26,3 +26,12 @@ StructureTower.prototype.defend = function (shouldHeal, shouldRepair) {
 		this.repair(target);
 	}
 };
+
+
+
+
+
+
+
+
+	
