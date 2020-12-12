@@ -13,7 +13,7 @@ var listOfRoles = [
   "grunt",
 ];
 
-var loggingLevel = "none"; //set to verbose for creep output
+var loggingLevel = "verbose"; //set to verbose for creep output
 
 StructureSpawn.prototype.updateTactics = function () {
   /** @type {Room} */
@@ -22,15 +22,7 @@ StructureSpawn.prototype.updateTactics = function () {
   /** @type {Array.<Creep>} */
   // let creepsInRoom = room.find(FIND_MY_CREEPS);
 
-  //set default minimum numbers for civilian population
-  this.memory.minCivilianCreeps = {
-    harvester: 1,
-    builder: 1,
-    repairer: 0,
-    wallRepairer: 0,
-    upgrader: 1,
-    lorry: 0,
-  };
+  
 
   //set default minimum number for armed forces population
   this.memory.minArmedCreeps = {
@@ -48,17 +40,17 @@ StructureSpawn.prototype.updateTactics = function () {
     filter: { structureType: STRUCTURE_CONTAINER },
   });
   // if containers exist in the room, then change creeps counts
-  // don't use harvesters anymore, use lorries.
+  // don't use harvesters anymore, use lorries and more.
   containerCount = containersInRoom.length;
   this.room.memory.strategy = { tactic: containerCount };
 
-  if (this.room.memory.strategy.tactic >= 1) {
+  if (this.room.memory.strategy.tactic > 0) {
     this.memory.minCivilianCreeps = {
       harvester: 0,
       builder: 1,
       repairer: 1,
       wallRepairer: 1,
-      upgrader: 2,
+      upgrader: 4,
       lorry: 2,
     };
   } else {
@@ -67,7 +59,7 @@ StructureSpawn.prototype.updateTactics = function () {
       builder: 1,
       repairer: 1,
       wallRepairer: 0,
-      upgrader: 3,
+      upgrader: 5,
       lorry: 0,
     };
   }
@@ -117,7 +109,7 @@ StructureSpawn.prototype.spawnCreepsIfNecessary = function () {
     if (
       numberOfCreeps["miner"] > 0 ||
       (room.storage != undefined &&
-        room.storage.store[RESOURCE_ENERGY] >= 150 + 550) //enough energy for a miner and a lorry
+        room.storage.store[RESOURCE_ENERGY] >= 550) //enough energy for a miner (!and a lorry)
     ) {
       // create a lorry
       name = this.createLorry(150);

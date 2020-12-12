@@ -4,45 +4,7 @@ require("prototype.tower");
 require("prototype.spawn");
 require("prototype.link");
 
-/* Game.spawns.Spawn2.memory.minCreeps = {
-  harvester: 0,
-  builder: 1,
-  repairer: 0,
-  wallRepairer: 0,
-  upgrader: 0,
-  lorry: 1,
-  marine: 0,
-  medic: 0,
-  archer: 0,
-  grunt: 0,
-}; 
 
-Game.spawns.Spawn3.memory.minCreeps = {
-  harvester: 0,
-  builder: 1,
-  repairer: 1,
-  wallRepairer: 1,
-  upgrader: 1,
-  lorry: 2,
-  marine: 0,
-  medic: 0,
-  archer: 0,
-  grunt: 0,
-};
-
-Game.spawns.Spawn4.memory.minCreeps = {
-  harvester: 0,
-  builder: 0,
-  repairer: 1,
-  wallRepairer: 0,
-  upgrader: 1,
-  lorry: 2,
-  marine: 0,
-  medic: 0,
-  archer: 0,
-  grunt: 0,
-};
-*/
 
 /* HOME IS CURRENTLY E44S47
 
@@ -56,6 +18,7 @@ Game.spawns.Spawn4.memory.minCreeps = {
 
 /*
 //  Insert this line via command line: Game.spawns.Spawn1.memory.claimRoom = "E45S47";
+//  Insert this line via command line: Game.spawns.Spawn1.memory.roomSigner = "Hi Mom!";
 
  Game.spawns.Spawn1.memory.minLongDistanceHarvesters = {
   E45S47: 0,
@@ -91,9 +54,24 @@ Game.spawns.Spawn2.memory.minLongDistanceHarvesters = {
 */
 
 // Game.rooms.E66S32.memory.links = { 0: 'linkFrom', 1:'linkTo'};
+var homeRoom;
+var northRoom;
+var southRoom;
+var eastRoom;
+var westRoom;
 
 module.exports.loop = function () {
   
+  
+  // set homeRoom based on location of spawn1
+  if (homeRoom === undefined){
+  homeRoom = Game.spawns['Spawn1'].room.name;
+  const exits = Game.map.describeExits(homeRoom);
+  console.log(JSON.stringify(exits));
+  console.log('home room is :' + homeRoom);
+
+  }
+
     // check for memory entries of died creeps by iterating over Memory.creeps
   for (let name in Memory.creeps) {
     // and checking if the creep is still alive
@@ -135,6 +113,7 @@ module.exports.loop = function () {
   for (let spawnName in Game.spawns) {
     // run spawn logic
     
+    // do this every other tick to save CPU, this could even happen even less often so long as it is shorter than then shortest spawn time in ticks.
     if (Game.time % 2==1){
       Game.spawns[spawnName].updateTactics();
     }
