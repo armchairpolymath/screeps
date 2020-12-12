@@ -44,26 +44,38 @@ Game.spawns.Spawn4.memory.minCreeps = {
 };
 */
 
-/* HOME IS CURRENTLY E66S32
+/* HOME IS CURRENTLY E44S47
 
 			E66S31
 			  |
-			E66S32 - E67S32
+			E44S47 - E45S47
 			  |
-			E66S33
+			E44S48
 
-*/
-//  Insert this line via command line: Game.spawns.Spawn1.memory.claimRoom = "E66S31";
-
-/* Game.spawns.Spawn1.memory.minLongDistanceHarvesters = {
-  E67S32: 0,
-  E66S33: 0,
-  E66S31: 0,
-}; 
 */
 
 /*
-Game.spawns.Spawn1.memory.minAirborne = { E67S32: 0, E66S33: 0, E66S34: 0 };
+//  Insert this line via command line: Game.spawns.Spawn1.memory.claimRoom = "E45S47";
+
+ Game.spawns.Spawn1.memory.minLongDistanceHarvesters = {
+  E45S47: 0,
+  E44S48: 0,
+  E44S46: 0,
+}; 
+
+Game.spawns.Spawn1.memory.minAirborne = { E45S47: 0, E44S48: 0, E44S46: 0 };
+
+Game.spawns.Spawn1.memory.minLongDistanceBuilders = {
+  E45S47: 1,
+  E44S48: 0,
+  E44S46: 0,
+};
+
+Game.spawns.Spawn1.memory.minAirborne = { E44S46: 1, E66S33: 0, E66S34: 0 };
+*/
+
+/*
+
 Game.spawns.Spawn1.memory.minSnipers = { E67S32: 0, E66S33: 0, E66S34: 0 };
 Game.spawns.Spawn1.memory.minLongDistanceBuilders = {
   E67S32: 0,
@@ -105,7 +117,7 @@ module.exports.loop = function () {
   // for each tower
   for (let tower of towers) {
     // run tower logic
-    tower.defend(true, true); //shouldHeal, shouldRepair
+    tower.defend(true, false); //shouldHeal, shouldRepair
   }
 
   /*
@@ -122,7 +134,12 @@ module.exports.loop = function () {
   // for each spawn
   for (let spawnName in Game.spawns) {
     // run spawn logic
-    Game.spawns[spawnName].updateTactics();
+    
+    if (Game.time % 2==1){
+      Game.spawns[spawnName].updateTactics();
+    }
+    
+    
     Game.spawns[spawnName].spawnCreepsIfNecessary();
   }
 };

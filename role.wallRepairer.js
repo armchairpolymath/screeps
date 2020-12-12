@@ -69,7 +69,7 @@ module.exports = {
 		}
 		// if creep is supposed to get energy
 		else {
-			creep.getEnergy(true, false, true, true); //container, source, dropped, storage
+			creep.getEnergy();
 		}
 	},
 };

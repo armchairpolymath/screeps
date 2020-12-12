@@ -25,17 +25,12 @@ Creep.prototype.runRole = function () {
 /** @function 
     @param {bool} useContainer
     @param {bool} useSource */
-Creep.prototype.getEnergy = function (
-  useContainer,
-  useSource,
-  useDropped,
-  useStorage
-) {
+Creep.prototype.getEnergy = function () {
   /** @type {StructureContainer} */
   let target;
   let container;
-  
   let storage;
+  let useDropped = true;
 
   if (useDropped) {
     // try the ground, because decay
@@ -57,6 +52,49 @@ Creep.prototype.getEnergy = function (
       });
     }
   }
+// determine who should go where for energy.
+
+if (this.role = 'harvester') {
+  useSource = true;
+  useStorage = true;
+  useContainer = false;
+  
+}
+
+if (this.role = 'builder') {
+  if (this.room.memory.strategy.tactic > 0){
+    useSource = false;
+    useStorage = true;
+    useContainer = true;
+  } else { //containers don't exist, so use source
+    useSource = true;
+    useStorage = false;
+    useContainer = false;
+  }
+}
+
+if (this.role = 'repairer') {
+  useSource = false;
+  useStorage = true;
+  useContainer = true;
+}
+
+if (this.role = 'upgrader') {
+  useSource = false;
+  useStorage = true;
+  useContainer = true;
+}
+if (this.role = 'wallRepairer') {
+  useSource = false;
+  useStorage = true;
+  useContainer = true;
+}
+if (this.role = 'longDistanceBuilder'){
+  useSource = true;
+  useStorage = true;
+  useContainer = true;
+}
+
 
   // if the Creep should look for storage
   if (useStorage) {

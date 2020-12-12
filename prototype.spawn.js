@@ -13,8 +13,7 @@ var listOfRoles = [
   "grunt",
 ];
 
-var strategyStartState = true;
-
+var loggingLevel = "none"; //set to verbose for creep output
 
 StructureSpawn.prototype.updateTactics = function () {
   /** @type {Room} */
@@ -23,49 +22,55 @@ StructureSpawn.prototype.updateTactics = function () {
   /** @type {Array.<Creep>} */
   // let creepsInRoom = room.find(FIND_MY_CREEPS);
 
-  let spawnsInRoom = room.find(FIND_MY_STRUCTURES, {
-    filter: (s) => (s.structureType = STRUCTURE_SPAWN),
+  //set default minimum numbers for civilian population
+  this.memory.minCivilianCreeps = {
+    harvester: 1,
+    builder: 1,
+    repairer: 0,
+    wallRepairer: 0,
+    upgrader: 1,
+    lorry: 0,
+  };
+
+  //set default minimum number for armed forces population
+  this.memory.minArmedCreeps = {
+    marine: 0,
+    medic: 0,
+    archer: 0,
+    grunt: 0,
+  };
+
+  let spawnsInRoom = this.room.find(FIND_MY_STRUCTURES, {
+    filter: (s) => s.structureType === STRUCTURE_SPAWN,
   });
 
-  let containersInRoom = room.find(FIND_STRUCTURES, {
-    filter: (s) => (s.structureType = STRUCTURE_CONTAINER),
+  let containersInRoom = this.room.find(FIND_STRUCTURES, {
+    filter: { structureType: STRUCTURE_CONTAINER },
   });
-
+  // if containers exist in the room, then change creeps counts
+  // don't use harvesters anymore, use lorries.
   containerCount = containersInRoom.length;
+  this.room.memory.strategy = { tactic: containerCount };
 
-  console.log('container count ' +  containerCount);
-  for (let spawnName in Game.spawns) {
-    this.memory.strategy.tactic = containerCount;
-    if (this.memory.strategy.tactic >= 1) {
-      this.memory.minCreeps = {
-        harvester: 0,
-        builder: 1,
-        repairer: 1,
-        wallRepairer: 1,
-        upgrader: 3,
-        lorry: 2,
-        marine: 0,
-        medic: 0,
-        archer: 0,
-        grunt: 0,
-      };
-    }
-    else {
-      this.memory.minCreeps = {
-        harvester: 2,
-        builder: 1,
-        repairer: 1,
-        wallRepairer: 0,
-        upgrader: 3,
-        lorry: 0,
-        marine: 0,
-        medic: 0,
-        archer: 0,
-        grunt: 0,
-      };
-    }
+  if (this.room.memory.strategy.tactic >= 1) {
+    this.memory.minCivilianCreeps = {
+      harvester: 0,
+      builder: 1,
+      repairer: 1,
+      wallRepairer: 1,
+      upgrader: 2,
+      lorry: 2,
+    };
+  } else {
+    this.memory.minCivilianCreeps = {
+      harvester: 2,
+      builder: 1,
+      repairer: 1,
+      wallRepairer: 0,
+      upgrader: 3,
+      lorry: 0,
+    };
   }
-  return strategyStartState;
 };
 
 // create a new function for StructureSpawn
@@ -84,24 +89,26 @@ StructureSpawn.prototype.spawnCreepsIfNecessary = function () {
   for (let role of listOfRoles) {
     numberOfCreeps[role] = _.sum(creepsInRoom, (c) => c.memory.role == role);
   }
-  console.log("Harvester | Repairer | Wall-Repairer > Builder > Upgrader");
-  console.log(
-    "Red for repair |Blue for Building |Green for Harvesting(Solid for Lorry) |Yellow for Upgrading |White for Lorry |Cyan for LD Harvest"
-  );
-  console.log(this.name);
 
-  for (let role of listOfRoles) {
+  if (loggingLevel == "verbose") {
+    console.log("Harvester | Repairer | Wall-Repairer > Builder > Upgrader");
     console.log(
-      numberOfCreeps[role] +
-        " " +
-        role +
-        "(s) of the required " +
-        this.memory.minCreeps[role]
+      "Red for repair |Blue for Building |Green for Harvesting(Solid for Lorry) |Yellow for Upgrading |White for Lorry |Cyan for LD Harvest"
     );
+
+    for (let role of listOfRoles) {
+      console.log(
+        numberOfCreeps[role] +
+          " " +
+          role +
+          "(s) of the required " +
+          this.memory.minCivilianCreeps[role]
+      );
+    }
   }
 
   let maxEnergy = room.energyCapacityAvailable;
-  let name = undefined;
+  let name; //this was set to = undefined.
 
   // if no harvesters are left AND either no miners or no lorries are left
   //  create a backup creep
@@ -110,7 +117,7 @@ StructureSpawn.prototype.spawnCreepsIfNecessary = function () {
     if (
       numberOfCreeps["miner"] > 0 ||
       (room.storage != undefined &&
-        room.storage.store[RESOURCE_ENERGY] >= 150 + 550)
+        room.storage.store[RESOURCE_ENERGY] >= 150 + 550) //enough energy for a miner and a lorry
     ) {
       // create a lorry
       name = this.createLorry(150);
@@ -157,6 +164,7 @@ StructureSpawn.prototype.spawnCreepsIfNecessary = function () {
       if (role == "claimer" && this.memory.claimRoom != undefined) {
         // try to spawn a claimer
         name = this.createClaimer(this.memory.claimRoom);
+        console.log("claimer");
         // if that worked
         if (name != undefined) {
           // delete the claim order
@@ -173,10 +181,15 @@ StructureSpawn.prototype.spawnCreepsIfNecessary = function () {
         }
       }
       // if no claim order was found, check other roles
-      else if (numberOfCreeps[role] < this.memory.minCreeps[role]) {
+      else if (numberOfCreeps[role] < this.memory.minCivilianCreeps[role]) {
         if (role == "lorry") {
           name = this.createLorry(150);
-        } else if (role == "medic") {
+        } else {
+          name = this.createCustomCreep(maxEnergy, role);
+        }
+        break;
+      } else if (numberOfCreeps[role] < this.memory.minArmedCreeps[role]) {
+        if (role == "medic") {
           name = this.createMedic(maxEnergy);
         } else if (role == "archer") {
           name = this.createArcher(maxEnergy);

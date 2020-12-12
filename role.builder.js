@@ -60,7 +60,7 @@ module.exports = {
 		// if creep is supposed to get energy
 		else {
 			// creep.pos.createConstructionSite(STRUCTURE_ROAD);
-			creep.getEnergy(true, true, false, true); //container, source, dropped, storage
+			creep.getEnergy();
 		}
 	}
 };

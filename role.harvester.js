@@ -65,7 +65,7 @@ module.exports = {
 				// creep.pos.createConstructionSite(STRUCTURE_ROAD);
 			}
 
-			creep.getEnergy(false, true, false, false); //container, source, dropped, storage
+			creep.getEnergy();
 		}
 	},
 };

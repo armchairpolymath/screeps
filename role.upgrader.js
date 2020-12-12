@@ -37,7 +37,7 @@ module.exports = {
 		else {
 			// container, source, dropped
 			// creep.pos.createConstructionSite(STRUCTURE_ROAD);
-			creep.getEnergy(true, false, true, true); //container, source, dropped, storage
+			creep.getEnergy();
 		}
 	},
 };
