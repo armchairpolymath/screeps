@@ -26,15 +26,16 @@ module.exports = {
 						(s.structureType == STRUCTURE_SPAWN ||
 							s.structureType == STRUCTURE_TOWER ||
 							s.structureType == STRUCTURE_EXTENSION) &&
-						s.energy < s.energyCapacity,
+						s.energy < s.energyCapacity
 				});
-
+				
 				if (structure == undefined) {
 					structure = creep.room.storage;
 				}
 
 				// if we found one
 				if (structure != undefined) {
+					
 					// try to transfer energy, if it is not in range
 					if (creep.transfer(structure, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
 						// move towards it
@@ -48,12 +49,7 @@ module.exports = {
 							},
 						});
 					}
-					var currentFillCount;
-					var newFillCount;
-					currentFillCount = creep.memory.fillCount;
-					newFillCount = currentFillCount + 1;
-					creep.memory.fillCount = newFillCount;
-
+					
 				}
 			}
 			// if not in home room...
@@ -68,6 +64,7 @@ module.exports = {
 		else {
 			// if in target room
 			if (creep.room.name == creep.memory.target) {
+				
 				// find source
 				var source = creep.room.find(FIND_SOURCES)[creep.memory.sourceIndex];
 

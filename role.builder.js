@@ -31,8 +31,10 @@ module.exports = {
 
 		// if creep is supposed to complete a constructionSite
 		if (creep.memory.working == true) {
-			// find closest constructionSite
-			var constructionSite = creep.pos.findClosestByPath(FIND_CONSTRUCTION_SITES);
+			// find closest constructionSite (every other tick)
+			
+				var constructionSite = creep.pos.findClosestByPath(FIND_CONSTRUCTION_SITES);
+			
 			// if one is found
 			if (constructionSite != undefined) {
 				// try to build, if the constructionSite is not in range
@@ -59,8 +61,9 @@ module.exports = {
 		}
 		// if creep is supposed to get energy
 		else {
-			// creep.pos.createConstructionSite(STRUCTURE_ROAD);
-			creep.getEnergy();
-		}
+			
+				creep.getEnergy();
+			} 
+		
 	}
 };

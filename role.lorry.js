@@ -27,7 +27,8 @@ module.exports = {
 						s.structureType == STRUCTURE_TOWER) &&
 					s.energy < s.energyCapacity,
 			});
-
+			
+			
 			if (structure == undefined) {
 				structure = creep.room.storage;
 			}
@@ -50,16 +51,9 @@ module.exports = {
 			}
 		}
 		// if creep is supposed to get energy
-		else {
-			//pickup engergy from the ground is more important because it decays
-			target = creep.pos.findClosestByRange(FIND_DROPPED_RESOURCES, {
-				filter: (s) => s.resourceType == RESOURCE_ENERGY,
-			});
-			if (target) {
-				if (creep.pickup(target) == ERR_NOT_IN_RANGE) {
-					creep.moveTo(target);
-				}
-			} else {
+		
+		
+			 else {
 				// find closest container
 				let container = creep.pos.findClosestByPath(FIND_STRUCTURES, {
 					filter: (s) => s.structureType == STRUCTURE_CONTAINER && s.store[RESOURCE_ENERGY] > 200,
@@ -68,7 +62,7 @@ module.exports = {
 				if (container == undefined) {
 				// find closest container
 				let container = creep.pos.findClosestByPath(FIND_STRUCTURES, {
-					filter: (s) => s.structureType == STRUCTURE_CONTAINER && s.store[RESOURCE_ENERGY] > 200,
+					filter: (s) => s.structureType == STRUCTURE_CONTAINER && s.store[RESOURCE_ENERGY] > 400,
 				});
 
 				if (container == undefined) {
@@ -92,6 +86,6 @@ module.exports = {
 					}
 				}
 			}
-		}
+		
 	},
 };

@@ -4,54 +4,13 @@ require("prototype.tower");
 require("prototype.spawn");
 require("prototype.link");
 
+//set to verbose for creep output
 
-
-/* HOME IS CURRENTLY E44S47
-
-			E66S31
-			  |
-			E44S47 - E45S47
-			  |
-			E44S48
-
-*/
-
-/*
-//  Insert this line via command line: Game.spawns.Spawn1.memory.claimRoom = "E45S47";
-//  Insert this line via command line: Game.spawns.Spawn1.memory.roomSigner = "Hi Mom!";
-
- Game.spawns.Spawn1.memory.minLongDistanceHarvesters = {
-  E45S47: 0,
-  E44S48: 0,
-  E44S46: 0,
-}; 
-
-Game.spawns.Spawn1.memory.minAirborne = { E45S47: 0, E44S48: 0, E44S46: 0 };
-
-Game.spawns.Spawn1.memory.minLongDistanceBuilders = {
-  E45S47: 1,
-  E44S48: 0,
-  E44S46: 0,
+Game.spawns.Spawn1.memory.minLongDistanceHarvesters = {
+	E21N27: 2,
+	W9S17: 0,
 };
 
-Game.spawns.Spawn1.memory.minAirborne = { E44S46: 1, E66S33: 0, E66S34: 0 };
-*/
-
-/*
-
-Game.spawns.Spawn1.memory.minSnipers = { E67S32: 0, E66S33: 0, E66S34: 0 };
-Game.spawns.Spawn1.memory.minLongDistanceBuilders = {
-  E67S32: 0,
-  E66S33: 0,
-  E66S31: 0,
-};
-Game.spawns.Spawn2.memory.minLongDistanceHarvesters = {
-  E68S32: 0,
-  E66S33: 0,
-  E66S31: 0,
-};
-
-*/
 
 // Game.rooms.E66S32.memory.links = { 0: 'linkFrom', 1:'linkTo'};
 var homeRoom;
@@ -61,18 +20,17 @@ var eastRoom;
 var westRoom;
 
 module.exports.loop = function () {
-  
-  
-  // set homeRoom based on location of spawn1
-  if (homeRoom === undefined){
-  homeRoom = Game.spawns['Spawn1'].room.name;
-  const exits = Game.map.describeExits(homeRoom);
-  console.log(JSON.stringify(exits));
-  console.log('home room is :' + homeRoom);
+  //Game.Memory.loggingLevel == "verbose";
 
+  // set homeRoom based on location of spawn1
+  if (homeRoom === undefined) {
+    homeRoom = Game.spawns["Spawn1"].room.name;
+    const exits = Game.map.describeExits(homeRoom);
+    console.log(JSON.stringify(exits));
+    console.log("home room is :" + homeRoom);
   }
 
-    // check for memory entries of died creeps by iterating over Memory.creeps
+  // check for memory entries of died creeps by iterating over Memory.creeps
   for (let name in Memory.creeps) {
     // and checking if the creep is still alive
     if (Game.creeps[name] == undefined) {
@@ -95,7 +53,7 @@ module.exports.loop = function () {
   // for each tower
   for (let tower of towers) {
     // run tower logic
-    tower.defend(true, false); //shouldHeal, shouldRepair
+    tower.defend(true, true); //shouldHeal, shouldRepair
   }
 
   /*
@@ -112,13 +70,12 @@ module.exports.loop = function () {
   // for each spawn
   for (let spawnName in Game.spawns) {
     // run spawn logic
-    
+
     // do this every other tick to save CPU, this could even happen even less often so long as it is shorter than then shortest spawn time in ticks.
-    if (Game.time % 2==1){
+    if (Game.time % 2 == 1) {
       Game.spawns[spawnName].updateTactics();
     }
-    
-    
+
     Game.spawns[spawnName].spawnCreepsIfNecessary();
   }
 };

@@ -18,151 +18,221 @@ var roles = {
   sniper: require("role.sniper"),
 };
 
+const global = require("./global");
+
 Creep.prototype.runRole = function () {
   roles[this.memory.role].run(this);
 };
 
-/** @function 
-    @param {bool} useContainer
-    @param {bool} useSource */
 Creep.prototype.getEnergy = function () {
-  /** @type {StructureContainer} */
-  let target;
-  let container;
-  let storage;
-  let useDropped = true;
+  var target;
+  var container;
+  var storage;
+  var useDropped;
 
-  if (useDropped) {
-    // try the ground, because decay
-    target = this.pos.findClosestByRange(FIND_DROPPED_RESOURCES, {
-      filter: (s) => s.resourceType == RESOURCE_ENERGY,
-    });
-  }
+  var containersInRoom = this.room.find(FIND_STRUCTURES, {
+    filter: { structureType: STRUCTURE_CONTAINER },
+  });
+  // if containers exist in the room, then change creeps counts
+  // don't use harvesters anymore, use lorries and more.
+  containerCount = containersInRoom.length;
+  // determine who should go where for energy.
 
-  if (target) {
-    if (this.pickup(target) == ERR_NOT_IN_RANGE) {
-      this.moveTo(container, {
-        visualizePathStyle: {
-          fill: "transparent",
-          stroke: "#008000", //Green for harvesting
-          lineStyle: "solid",
-          strokeWidth: 0.08,
-          opacity: 1,
-        },
-      });
+  if (this.memory.role == "harvester") {
+    if (containerCount == 0) {
+      useSource = true;
+      useContainer = false;
+    } else {
+      useSource = false;
+      useContainer = true;
     }
-  }
-// determine who should go where for energy.
-
-if (this.role = 'harvester') {
-  useSource = true;
-  useStorage = true;
-  useContainer = false;
-  
-}
-
-if (this.role = 'builder') {
-  if (this.room.memory.strategy.tactic > 0){
-    useSource = false;
-    useStorage = true;
-    useContainer = true;
-  } else { //containers don't exist, so use source
-    useSource = true;
+    useDropped = true;
     useStorage = false;
-    useContainer = false;
   }
-}
 
-if (this.role = 'repairer') {
-  useSource = false;
-  useStorage = true;
-  useContainer = true;
-}
-
-if (this.role = 'upgrader') {
-  useSource = false;
-  useStorage = true;
-  useContainer = true;
-}
-if (this.role = 'wallRepairer') {
-  useSource = false;
-  useStorage = true;
-  useContainer = true;
-}
-if (this.role = 'longDistanceBuilder'){
-  useSource = true;
-  useStorage = true;
-  useContainer = true;
-}
-
-
-  // if the Creep should look for storage
-  if (useStorage) {
-    // find the closest storage
-    storage = this.pos.findClosestByPath(FIND_STRUCTURES, {
-      filter: (s) =>
-        s.structureType == STRUCTURE_STORAGE && s.store[RESOURCE_ENERGY] > 250,
-    });
-    //if one was found
-    if (storage != undefined) {
-      if (this.withdraw(storage, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-        //move towards it
-        this.moveTo(storage, {
-          visualizePathStyle: {
-            fill: "transparent",
-            stroke: "#fff",
-            lineStyle: "dashed",
-            strokeWidth: 0.08,
-            opacity: 0.15,
-          },
-        });
-      }
+  if (this.memory.role == "builder") {
+    if (containerCount == 0) {
+      useSource = true;
+      useContainer = false;
+    } else {
+      useSource = false;
+      useContainer = true;
     }
+    useStorage = false;
+    useDropped = true;
   }
 
-  // if the Creep should look for containers
-  if (useContainer && storage == undefined) {
-    // find closest container
-    container = this.pos.findClosestByPath(FIND_STRUCTURES, {
-      filter: (s) =>
-        (s.structureType == STRUCTURE_CONTAINER ||
-          s.structureType == STRUCTURE_STORAGE) &&
-        s.store[RESOURCE_ENERGY] > 250,
-    });
-    // if one was found
-    if (container != undefined) {
-      // try to withdraw energy, if the container is not in range
-      if (this.withdraw(container, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-        // move towards it
-        this.moveTo(container, {
-          visualizePathStyle: {
-            fill: "transparent",
-            stroke: "#fff",
-            lineStyle: "dashed",
-            strokeWidth: 0.08,
-            opacity: 0.15,
-          },
-        });
-      }
+  if (this.memory.role == "repairer") {
+    if (containerCount == 0) {
+      useSource = true;
+      useContainer = false;
+    } else {
+      useSource = false;
+      useContainer = true;
     }
+    useStorage = true;
+    useDropped = true;
   }
-  // if no container was found and the Creep should look for Sources
-  if (useSource) {
-    // find closest source
-    var source = this.pos.findClosestByPath(FIND_SOURCES_ACTIVE);
 
-    // try to harvest energy, if the source is not in range
-    if (this.harvest(source) == ERR_NOT_IN_RANGE) {
-      // move towards it
-      this.moveTo(source, {
-        visualizePathStyle: {
-          fill: "transparent",
-          stroke: "#080",
-          lineStyle: "dashed",
-          strokeWidth: 0.08,
-          opacity: 0.15,
-        },
+  if (this.memory.role == "repairer") {
+    if (containerCount == 0) {
+      useSource = true;
+      useContainer = false;
+    } else {
+      useSource = false;
+      useContainer = true;
+    }
+    useStorage = true;
+    useDropped = true;
+  }
+
+  if (this.memory.role == "upgrader") {
+    if (containerCount == 0) {
+      useSource = true;
+      useContainer = false;
+    } else {
+      useSource = false;
+      useContainer = true;
+    }
+    useStorage = true;
+    useDropped = false;
+  }
+  if (this.memory.role == "wallRepairer") {
+    if (containerCount == 0) {
+      useSource = true;
+      useContainer = false;
+    } else {
+      useSource = false;
+      useContainer = true;
+    }
+    useStorage = true;
+    useDropped = true;
+  }
+  if (this.memory.role == "longDistanceBuilder") {
+    if (containerCount == 0) {
+      useSource = true;
+      useContainer = false;
+    } else {
+      useSource = false;
+      useContainer = true;
+    }
+    useStorage = true;
+    useDropped = true;
+  }
+
+  if (this.ticksToLive > 80) {
+    if (useDropped) {
+      // try the ground, because decay
+      if (global.loggingLevel == "verbose") {
+        this.say("dropped");
+      }
+      target = this.pos.findClosestByPath(FIND_DROPPED_RESOURCES, {
+        filter: (s) => s.resourceType == RESOURCE_ENERGY && s.amount > 75,
       });
     }
+
+    if (target) {
+      if (this.pickup(target) == ERR_NOT_IN_RANGE) {
+        this.moveTo(target, {
+          visualizePathStyle: {
+            fill: "transparent",
+            stroke: "#008000", //Green for harvesting
+            lineStyle: "solid",
+            strokeWidth: 0.08,
+            opacity: 1,
+          },
+        });
+      }
+    }
+
+    // if the Creep should look for storage
+    if (useStorage && target == undefined) {
+      if (global.loggingLevel == "verbose") {
+        this.say("storage");
+      }
+      // find the closest storage
+      storage = this.pos.findClosestByPath(FIND_STRUCTURES, {
+        filter: (s) =>
+          s.structureType == STRUCTURE_STORAGE &&
+          s.store[RESOURCE_ENERGY] > 450,
+      });
+      //if one was found
+      if (storage != undefined) {
+        if (this.withdraw(storage, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+          //move towards it
+          this.moveTo(storage, {
+            visualizePathStyle: {
+              fill: "transparent",
+              stroke: "#fff",
+              lineStyle: "dashed",
+              strokeWidth: 0.08,
+              opacity: 0.15,
+            },
+          });
+        }
+      }
+    }
+
+    // if the Creep should look for containers
+    if (useContainer && target == undefined && storage == undefined) {
+      if (global.loggingLevel == "verbose") {
+        this.say("container");
+      }
+      // find closest container
+      container = this.pos.findClosestByPath(FIND_STRUCTURES, {
+        filter: (s) =>
+          (s.structureType == STRUCTURE_CONTAINER ||
+            s.structureType == STRUCTURE_STORAGE) &&
+          s.store[RESOURCE_ENERGY] > 450,
+      });
+      // if one was found
+      if (container != undefined) {
+        // try to withdraw energy, if the container is not in range
+        if (this.withdraw(container, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+          // move towards it
+          this.moveTo(container, {
+            visualizePathStyle: {
+              fill: "transparent",
+              stroke: "#fff",
+              lineStyle: "dashed",
+              strokeWidth: 0.08,
+              opacity: 0.15,
+            },
+          });
+        }
+      }
+    }
+    // if no container was found and the Creep should look for Sources
+    if (
+      useSource &&
+      target == undefined &&
+      storage == undefined &&
+      container == undefined
+    ) {
+      if (global.loggingLevel == "verbose") {
+        this.say("source");
+      }
+      // find closest source
+      var source = this.pos.findClosestByPath(FIND_SOURCES_ACTIVE);
+
+      // try to harvest energy, if the source is not in range
+      if (this.harvest(source) == ERR_NOT_IN_RANGE) {
+        // move towards it
+        this.moveTo(source, {
+          visualizePathStyle: {
+            fill: "transparent",
+            stroke: "#080",
+            lineStyle: "dashed",
+            strokeWidth: 0.08,
+            opacity: 0.15,
+          },
+        });
+      }
+    }
+  } else {
+    if (global.loggingLevel == "verbose") {
+      this.say("Forget Me");
+    }
+    this.memory.working = true;
   }
 };

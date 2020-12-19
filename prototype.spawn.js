@@ -1,3 +1,7 @@
+const global = require("./global");
+
+require("prototype.spawn-roles");
+
 var listOfRoles = [
   "harvester",
   "lorry",
@@ -13,17 +17,12 @@ var listOfRoles = [
   "grunt",
 ];
 
-var loggingLevel = "verbose"; //set to verbose for creep output
-
 StructureSpawn.prototype.updateTactics = function () {
   /** @type {Room} */
   let room = this.room;
   // find all creeps in room
   /** @type {Array.<Creep>} */
   // let creepsInRoom = room.find(FIND_MY_CREEPS);
-
-  
-
   //set default minimum number for armed forces population
   this.memory.minArmedCreeps = {
     marine: 0,
@@ -32,34 +31,38 @@ StructureSpawn.prototype.updateTactics = function () {
     grunt: 0,
   };
 
-  let spawnsInRoom = this.room.find(FIND_MY_STRUCTURES, {
+  var spawnsInRoom = this.room.find(FIND_MY_STRUCTURES, {
     filter: (s) => s.structureType === STRUCTURE_SPAWN,
   });
 
-  let containersInRoom = this.room.find(FIND_STRUCTURES, {
+  var containersInRoom = this.room.find(FIND_STRUCTURES, {
     filter: { structureType: STRUCTURE_CONTAINER },
   });
   // if containers exist in the room, then change creeps counts
   // don't use harvesters anymore, use lorries and more.
   containerCount = containersInRoom.length;
-  this.room.memory.strategy = { tactic: containerCount };
+  this.room.memory.strategy = this.room.controller.level;
 
-  if (this.room.memory.strategy.tactic > 0) {
-    this.memory.minCivilianCreeps = {
-      harvester: 0,
-      builder: 1,
-      repairer: 1,
-      wallRepairer: 1,
-      upgrader: 4,
-      lorry: 2,
-    };
-  } else {
+  console.log("strategy " + this.room.controller.level);
+
+  if (this.room.memory.strategy == 1) {
+    console.log("1");
     this.memory.minCivilianCreeps = {
       harvester: 2,
       builder: 1,
       repairer: 1,
       wallRepairer: 0,
-      upgrader: 5,
+      upgrader: 1,
+      lorry: 0,
+    };
+  } else if (this.room.memory.strategy >= 2) {
+    console.log("2");
+    this.memory.minCivilianCreeps = {
+      harvester: 1,
+      builder: 1,
+      repairer: 1,
+      wallRepairer: 0,
+      upgrader: 3,
       lorry: 0,
     };
   }
@@ -82,7 +85,7 @@ StructureSpawn.prototype.spawnCreepsIfNecessary = function () {
     numberOfCreeps[role] = _.sum(creepsInRoom, (c) => c.memory.role == role);
   }
 
-  if (loggingLevel == "verbose") {
+  if (global.loggingLevel == "verbose") {
     console.log("Harvester | Repairer | Wall-Repairer > Builder > Upgrader");
     console.log(
       "Red for repair |Blue for Building |Green for Harvesting(Solid for Lorry) |Yellow for Upgrading |White for Lorry |Cyan for LD Harvest"
@@ -108,8 +111,7 @@ StructureSpawn.prototype.spawnCreepsIfNecessary = function () {
     // if there are still miners or enough energy in Storage left
     if (
       numberOfCreeps["miner"] > 0 ||
-      (room.storage != undefined &&
-        room.storage.store[RESOURCE_ENERGY] >= 550) //enough energy for a miner (!and a lorry)
+      (room.storage != undefined && room.storage.store[RESOURCE_ENERGY] >= 550) //enough energy for a miner (!and a lorry)
     ) {
       // create a lorry
       name = this.createLorry(150);
@@ -351,318 +353,4 @@ StructureSpawn.prototype.spawnCreepsIfNecessary = function () {
       console.log("Sniper_" + roomName + ": " + numberOfSnipers[roomName]);
     }
   }
-};
-
-// create a new function for StructureSpawn
-StructureSpawn.prototype.createCustomCreep = function (energy, roleName) {
-  // create a balanced body as big as possible with the given energy
-  var numberOfParts = Math.floor(energy / 200);
-  // make sure the creep is not too big (more than 50 parts)
-  numberOfParts = Math.min(numberOfParts, Math.floor(50 / 3));
-  var body = [];
-  for (let i = 0; i < numberOfParts; i++) {
-    body.push(WORK);
-  }
-  for (let i = 0; i < numberOfParts; i++) {
-    body.push(CARRY);
-  }
-  for (let i = 0; i < numberOfParts; i++) {
-    body.push(MOVE);
-  }
-
-  // create creep with the created body and the given role
-
-  return this.spawnCreep(body, roleName + "_" + Game.time, {
-    memory: { role: roleName, working: false, roleChange: false },
-  });
-};
-
-// create a new function for StructureSpawn
-StructureSpawn.prototype.createLongDistanceBuilder = function (
-  energy,
-  numberOfWorkParts,
-  home,
-  target
-) {
-  var numberOfParts = Math.floor(energy / 200);
-  // make sure the creep is not too big (more than 50 parts)
-  numberOfParts = Math.min(numberOfParts, Math.floor(50 / 3));
-  var body = [];
-  for (let i = 0; i < numberOfParts; i++) {
-    body.push(WORK);
-  }
-  for (let i = 0; i < numberOfParts; i++) {
-    body.push(CARRY);
-  }
-  for (let i = 0; i < numberOfParts; i++) {
-    body.push(MOVE);
-  }
-
-  // create creep with the created body
-  return this.spawnCreep(body, "ld_Builder_" + Game.time, {
-    memory: {
-      role: "longDistanceBuilder",
-      home: home,
-      target: target,
-      working: false,
-      energyCost: energy,
-    },
-  });
-};
-
-StructureSpawn.prototype.createLongDistanceHarvester = function (
-  energy,
-  numberOfWorkParts,
-  home,
-  target,
-  sourceIndex
-) {
-  // create a body with the specified number of WORK parts and one MOVE part per non-MOVE part
-  if (energy > 1000) {
-    energy == 1000;
-  }
-  var body = [];
-  for (let i = 0; i < numberOfWorkParts; i++) {
-    body.push(WORK);
-  }
-
-  // 150 = 100 (cost of WORK) + 50 (cost of MOVE)
-  energy -= 150 * numberOfWorkParts;
-
-  var numberOfParts = Math.floor(energy / 100);
-  // make sure the creep is not too big (more than 50 parts)
-  numberOfParts = Math.min(
-    numberOfParts,
-    Math.floor((50 - numberOfWorkParts * 2) / 2)
-  );
-  for (let i = 0; i < numberOfParts; i++) {
-    body.push(CARRY);
-  }
-  for (let i = 0; i < numberOfParts + numberOfWorkParts; i++) {
-    body.push(MOVE);
-  }
-
-  // create creep with the created body
-  return this.spawnCreep(body, "ld_Harvester_" + Game.time, {
-    memory: {
-      role: "longDistanceHarvester",
-      home: home,
-      target: target,
-      sourceIndex: sourceIndex,
-      working: false,
-      energyCost: energy,
-      fillCount: 0,
-    },
-  });
-};
-StructureSpawn.prototype.createMarine = function (energy) {
-  // create a balanced body as big as possible with the given energy
-  var numberOfParts = Math.floor(energy / 460);
-  // make sure the creep is not too big (more than 50 parts)
-  numberOfParts = Math.min(numberOfParts, Math.floor(50 / 20));
-  var body = [];
-  for (let i = 0; i < 15; i++) {
-    for (let i = 0; i < numberOfParts; i++) {
-      body.push(TOUGH);
-    }
-  }
-
-  for (let i = 0; i < numberOfParts; i++) {
-    body.push(ATTACK);
-  }
-  for (let i = 0; i < numberOfParts; i++) {
-    body.push(ATTACK);
-  }
-  for (let i = 0; i < numberOfParts; i++) {
-    body.push(MOVE);
-  }
-  for (let i = 0; i < numberOfParts; i++) {
-    body.push(MOVE);
-  }
-  for (let i = 0; i < numberOfParts; i++) {
-    body.push(MOVE);
-  }
-
-  // create creep with the created body and the given role
-  return this.spawnCreep(body, "Marine_" + Game.time, {
-    memory: { role: "marine", working: false, roleChange: false },
-  });
-};
-
-StructureSpawn.prototype.createAirborne = function (energy, home, target) {
-  // create a balanced body as big as possible with the given energy
-  var numberOfParts = Math.floor(energy / 270);
-  // make sure the creep is not too big (more than 50 parts)
-  numberOfParts = Math.min(numberOfParts, Math.floor(50 / 4));
-  var body = [];
-  for (let i = 0; i < numberOfParts; i++) {
-    body.push(TOUGH);
-  }
-  for (let i = 0; i < numberOfParts; i++) {
-    body.push(ATTACK);
-  }
-  for (let i = 0; i < numberOfParts; i++) {
-    body.push(MOVE);
-  }
-  for (let i = 0; i < numberOfParts; i++) {
-    body.push(MOVE);
-  }
-
-  // create creep with the created body and the given role
-  return this.spawnCreep(body, "Airborne_" + Game.time, {
-    memory: {
-      role: "airborne",
-      target: target,
-      home: home,
-      working: false,
-      roleChange: false,
-    },
-  });
-};
-
-StructureSpawn.prototype.createSniper = function (energy, home, target) {
-  // create a balanced body as big as possible with the given energy
-  var numberOfParts = Math.floor(energy / 210);
-  // make sure the creep is not too big (more than 50 parts)
-  numberOfParts = Math.min(numberOfParts, Math.floor(50 / 3));
-  var body = [];
-  for (let i = 0; i < numberOfParts; i++) {
-    body.push(TOUGH);
-  }
-  for (let i = 0; i < numberOfParts; i++) {
-    body.push(RANGED_ATTACK);
-  }
-  for (let i = 0; i < numberOfParts; i++) {
-    body.push(MOVE);
-  }
-
-  // create creep with the created body and the given role
-  return this.spawnCreep(body, "Sniper_" + Game.time, {
-    memory: {
-      role: "sniper",
-      target: target,
-      home: home,
-      working: false,
-      roleChange: false,
-    },
-  });
-};
-
-StructureSpawn.prototype.createGrunt = function (energy) {
-  // create a balanced body as big as possible with the given energy
-  var numberOfParts = Math.floor(energy / 270);
-  // make sure the creep is not too big (more than 50 parts)
-  numberOfParts = Math.min(numberOfParts, Math.floor(50 / 4));
-  var body = [];
-  for (let i = 0; i < numberOfParts; i++) {
-    body.push(TOUGH);
-  }
-  for (let i = 0; i < numberOfParts; i++) {
-    body.push(ATTACK);
-  }
-  for (let i = 0; i < numberOfParts; i++) {
-    body.push(MOVE);
-  }
-  for (let i = 0; i < numberOfParts; i++) {
-    body.push(MOVE);
-  }
-
-  // create creep with the created body and the given role
-  return this.spawnCreep(body, "Grunt" + Game.time, {
-    memory: { role: "grunt", working: false, roleChange: false },
-  });
-};
-
-// create a new function for StructureSpawn
-StructureSpawn.prototype.createArcher = function (energy) {
-  // create a balanced body as big as possible with the given energy
-  var numberOfParts = Math.floor(energy / 210);
-  // make sure the creep is not too big (more than 50 parts)
-  numberOfParts = Math.min(numberOfParts, Math.floor(50 / 3));
-  var body = [];
-  for (let i = 0; i < numberOfParts; i++) {
-    body.push(TOUGH);
-  }
-  for (let i = 0; i < numberOfParts; i++) {
-    body.push(RANGED_ATTACK);
-  }
-  for (let i = 0; i < numberOfParts; i++) {
-    body.push(MOVE);
-  }
-
-  // create creep with the created body and the given role
-  return this.spawnCreep(body, "Archer_" + Game.time, {
-    memory: { role: "archer", working: false, roleChange: false },
-  });
-};
-
-StructureSpawn.prototype.createMedic = function (energy) {
-  // create a balanced body as big as possible with the given energy
-  var numberOfParts = Math.floor(energy / 600);
-  // make sure the creep is not too big (more than 50 parts)
-  numberOfParts = Math.min(numberOfParts, Math.floor(50 / 4));
-  var body = [];
-  for (let i = 0; i < numberOfParts; i++) {
-    body.push(HEAL);
-  }
-  var body = [];
-  for (let i = 0; i < numberOfParts; i++) {
-    body.push(HEAL);
-  }
-  for (let i = 0; i < numberOfParts; i++) {
-    body.push(MOVE);
-  }
-  for (let i = 0; i < numberOfParts; i++) {
-    body.push(MOVE);
-  }
-
-  // create creep with the created body and the given role
-  return this.spawnCreep(body, "Medic_" + Game.time, {
-    memory: { role: "medic", working: false, roleChange: false },
-  });
-};
-
-// create a new function for StructureSpawn
-StructureSpawn.prototype.createSigner = function (signContent) {
-  return this.spawnCreep([MOVE], "Signer_" + Game.time, {
-    memory: { role: "signer", roomSign: signContent },
-  });
-};
-
-// create a new function for StructureSpawn
-StructureSpawn.prototype.createClaimer = function (target) {
-  return this.spawnCreep([CLAIM, MOVE], "Claimer_" + Game.time, {
-    memory: { role: "claimer", target: target },
-  });
-};
-
-// create a new function for StructureSpawn
-StructureSpawn.prototype.createMiner = function (sourceId) {
-  return this.spawnCreep(
-    [WORK, WORK, WORK, WORK, WORK, MOVE],
-    "Miner_" + Game.time,
-    {
-      memory: { role: "miner", sourceId: sourceId },
-    }
-  );
-};
-
-// create a new function for StructureSpawn
-StructureSpawn.prototype.createLorry = function (energy) {
-  // create a body with twice as many CARRY as MOVE parts
-  var numberOfParts = Math.floor(energy / 150);
-  // make sure the creep is not too big (more than 50 parts)
-  numberOfParts = Math.min(numberOfParts, Math.floor(50 / 3));
-  var body = [];
-  for (let i = 0; i < numberOfParts * 2; i++) {
-    body.push(CARRY);
-  }
-  for (let i = 0; i < numberOfParts; i++) {
-    body.push(MOVE);
-  }
-
-  // create creep with the created body and the role 'lorry'
-  return this.spawnCreep(body, "Lorry_" + Game.time, {
-    memory: { role: "lorry", working: false },
-  });
 };
